@@ -1,0 +1,6 @@
+{
+  "name": "Dua Bhandar",
+  "description": "Dua Bhandar is a beautifully designed, feature-rich Islamic Duas application with clean navigation, category grid, dynamic daily banner, and local database persistence.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
