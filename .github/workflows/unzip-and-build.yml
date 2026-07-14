@@ -1,45 +1,13 @@
-name: Unzip project and build APK
+name: Build APK
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
-  unzip:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Check if zip exists and extract it
-        run: |
-          ZIPFILE=$(find . -maxdepth 1 -name "*.zip" | head -n 1)
-          if [ -n "$ZIPFILE" ]; then
-            echo "Found zip: $ZIPFILE"
-            unzip -o "$ZIPFILE" -d extracted_tmp
-            shopt -s dotglob
-            cp -rf extracted_tmp/* .
-            rm -rf extracted_tmp
-            rm -f "$ZIPFILE"
-            git config --local user.email "actions@github.com"
-            git config --local user.name "GitHub Actions"
-            git add -A
-            git commit -m "Auto-extract zip contents" || echo "Nothing to commit"
-            git push
-          else
-            echo "No zip file found, skipping extraction."
-          fi
-
   build:
-    needs: unzip
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: main
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -48,16 +16,10 @@ jobs:
           java-version: '17'
 
       - name: Grant execute permission for gradlew
-        run: chmod +x gradlew || echo "no gradlew yet"
+        run: chmod +x gradlew
 
       - name: Build debug APK
-        run: |
-          if [ -f "./gradlew" ]; then
-            ./gradlew assembleDebug --stacktrace
-          else
-            echo "gradlew not found - project may not be extracted yet. Re-run this workflow after the unzip job has completed."
-            exit 1
-          fi
+        run: ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
